@@ -41,6 +41,24 @@ DATA_DIR = BASE_DIR / "data"
 DATA_DIR.mkdir(exist_ok=True)  # Create 'data' folder if it doesn't exist
 
 # -------------------------------
+# Root Endpoint
+# -------------------------------
+@app.get("/")
+def root():
+    """
+    Root endpoint.
+    Purpose:
+    - Quick sanity check that the API is running
+    - Helpful for browsers, load balancers, and monitoring tools
+    """
+    return {
+        "service": "Enterprise Document Intelligence API",
+        "status": "running",
+        "version": "0.1.0"
+    }
+
+
+# -------------------------------
 # Health Check Endpoint
 # -------------------------------
 @app.get("/health")
