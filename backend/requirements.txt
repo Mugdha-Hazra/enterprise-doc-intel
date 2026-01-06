@@ -1,5 +1,4 @@
-FastAPI app setup
-Directory setup
-ROOT endpoint        <-- add here
-Health endpoint
-Upload endpoint
+fastapi>=0.110
+uvicorn[standard]>=0.27
+PyMuPDF>=1.23
+python-multipart>=0.0.9
