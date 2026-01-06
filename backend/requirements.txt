@@ -1,4 +1,5 @@
-fastapi
-uvicorn
-python-multipart
-pydantic
+FastAPI app setup
+Directory setup
+ROOT endpoint        <-- add here
+Health endpoint
+Upload endpoint
