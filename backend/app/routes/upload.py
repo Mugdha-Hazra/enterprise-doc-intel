@@ -3,7 +3,7 @@ from fastapi import APIRouter, UploadFile, File # Import necessary FastAPI compo
 from datetime import datetime # Import datetime for timestamping uploads
 from app.services.pdf_service import extract_text_from_pdf # Import the PDF text extraction service
 
-router = APIRouter() # Initialize APIRouter instance
+router = APIRouter(prefix="/api/v1") # Initialize APIRouter instance
 
 UPLOAD_DIR = "data" # Directory to save uploaded files
 os.makedirs(UPLOAD_DIR, exist_ok=True) # Ensure the upload directory exists
