@@ -1,4 +1,6 @@
-# 1. Project Setup (Foundation)
+# Enterprise Document Intelligence API
+
+## 1. Project Setup (Foundation)
 
 ### Actions Taken:
 
@@ -10,9 +12,9 @@
 
    with subfolders:
 
-   * `backend/` → Python backend
+   * `backend/` → Python FastAPI backend
    * `android/` → future mobile client
-   * `README.md` → placeholder
+   * `README.md` → project documentation
 
 2. **Initialized Git repository**
 
@@ -21,9 +23,9 @@
    git branch -M main
    ```
 
-   This allows **version control** and incremental commits.
+   * Enables **version control** and incremental commits.
 
-3. **Created virtual environment**
+3. **Created Python virtual environment**
 
    ```bat
    python -m venv venv
@@ -31,169 +33,199 @@
    ```
 
    * Isolated project dependencies
-   * Ensures no conflict with system Python
+   * Prevents conflicts with system Python
 
-4. **Installed dependencies** via `requirements.txt`:
+4. **Installed dependencies** (via `requirements.txt`):
 
    * `fastapi` → backend framework
-   * `uvicorn` → server for FastAPI
+   * `uvicorn` → ASGI server for FastAPI
    * `pydantic` → data validation
-   * `python-multipart` → file uploads
+   * `python-multipart` → file upload handling
+   * Additional packages: `shutil`, `pathlib` (built-in), etc.
 
-5. **Created backend folder structure**
+5. **Backend folder structure**
 
    ```
    backend/
        app/
            main.py
+       data/                  # PDF storage
        venv/
        requirements.txt
    ```
 
 6. **Verified FastAPI Health Check**
 
-   * Endpoint: `/health`
-   * Returned: `{"status":"ok"}`
-   * This validated **backend is running**.
+   * Endpoint: `/api/v1/health`
+   * Response: `{"status":"ok"}`
+   * Confirms backend is **running correctly**.
 
 ---
 
-# 2. GitHub Integration
+## 2. GitHub Integration
 
-* Created **GitHub repo**
-* Linked local repo to GitHub
-* Pushed first commit
-* Set up credential caching
-* Outcome: full remote backup and version tracking
+* Repository created and linked to local repo
+* First commit pushed
+* Credential caching enabled
+* Outcome: **Remote backup + version tracking**
 
 ---
 
-# 3. Phase 2: Document Upload (First Functional Feature)
+## 3. Project Architecture
 
-### Step 1: Prepare Storage
+![Enterprise Document Intelligence API Architecture](./docs/Enterprise_Document_Intelligence_API_Architecture.png)
+
+**Description:**
+
+* Clients (Web/Mobile) interact with **FastAPI backend**
+* Routes available under `/api/v1/`:
+
+  * `/health` → checks server status
+  * `/upload` → accepts PDF files only
+* Uploaded PDFs stored in **`backend/data/`**
+* Swagger UI provides **interactive API testing**
+* Backend designed for **enterprise-level data separation and offline-first operation**
+
+---
+
+## 4. Phase 2: Document Upload Feature
+
+### Step 1: Storage Preparation
 
 * Created `backend/data/` folder
-* Added to `.gitignore` → **ensures uploaded files are not committed**
-* Mimics **enterprise-grade data separation**.
+* Added to `.gitignore` → prevents committing user data
+* Mimics **enterprise-grade separation of data**.
 
 ---
 
 ### Step 2: Add `/upload` Endpoint
 
-#### How It Works (Technical Breakdown)
-
-**Code Section:**
+**Python Implementation:**
 
 ```python
-@app.post("/upload")
+@app.post("/api/v1/upload")
 def upload_document(file: UploadFile = File(...)):
     if file.content_type != "application/pdf":
         raise HTTPException(status_code=400, detail="Only PDF files are supported")
 
     destination = DATA_DIR / file.filename
-
     with destination.open("wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    return {
-        "filename": file.filename,
-        "status": "uploaded"
-    }
+    return {"filename": file.filename, "status": "uploaded"}
 ```
 
 **Step-by-Step Explanation:**
 
-1. **`@app.post("/upload")`**
+1. **`@app.post("/api/v1/upload")`**
 
-   * Defines a **POST HTTP endpoint** `/upload`
-   * Receives **multipart/form-data** requests (file uploads)
+   * Receives **POST requests** with file upload.
+2. **File Handling**
 
-2. **`file: UploadFile = File(...)`**
+   * `UploadFile` provides filename, file stream, and MIME type.
+3. **Validation**
 
-   * FastAPI automatically parses the uploaded file
-   * `UploadFile` provides:
+   * Ensures only **PDF files** are accepted.
+4. **File Storage**
 
-     * `file.filename` → original filename
-     * `file.file` → file stream
-     * `file.content_type` → MIME type (PDF = `application/pdf`)
+   * Streams file to `backend/data/` safely.
+5. **Response**
 
-3. **PDF Check**
-
-   ```python
-   if file.content_type != "application/pdf":
-       raise HTTPException(status_code=400, detail="Only PDF files are supported")
-   ```
-
-   * Ensures **enterprise constraint**: only PDFs accepted
-
-4. **Destination Path**
-
-   ```python
-   destination = DATA_DIR / file.filename
-   ```
-
-   * Computes where to save file in `backend/data/`
-
-5. **Write File**
-
-   ```python
-   with destination.open("wb") as buffer:
-       shutil.copyfileobj(file.file, buffer)
-   ```
-
-   * Streams uploaded file directly to disk
-   * Safe for large files
-   * Mimics **real-world file storage** in enterprise systems
-
-6. **Return Response**
-
-   ```python
-   return {"filename": file.filename, "status": "uploaded"}
-   ```
-
-   * Confirms to client that file was saved successfully
+   * Returns JSON confirming successful upload.
 
 ---
 
-### Step 3: Swagger UI (FastAPI Auto Docs)
+### Step 3: Swagger UI
 
 * Navigate: `http://127.0.0.1:8000/docs`
-* FastAPI automatically generated:
+* Interactive API testing:
 
-  * `/health` → GET
-  * `/upload` → POST
-* Allows **interactive testing**:
-
-  * Choose file
-  * Click “Execute”
-  * See JSON response
-
-This is **enterprise-grade developer UX**, like internal API portals.
+  * `/api/v1/health` → GET
+  * `/api/v1/upload` → POST (PDF only)
+* Allows **quick validation of endpoints**.
 
 ---
 
-# ✅ Summary of Achievements So Far
+## 5. Current Status
 
-1. **Infrastructure Setup**
+| Feature                            | Status                      |
+| ---------------------------------- | --------------------------- |
+| Project Folder & Backend Setup     | ✅ Completed                 |
+| Git + GitHub Integration           | ✅ Completed                 |
+| Virtual Environment & Dependencies | ✅ Completed                 |
+| `/api/v1/health` endpoint          | ✅ Working                   |
+| `/api/v1/upload` endpoint          | ✅ Working (PDF only)        |
+| Swagger UI                         | ✅ Interactive testing ready |
+| File storage (`backend/data/`)     | ✅ Working                   |
+| API versioning `/api/v1/`          | ✅ Implemented               |
 
-   * Project folders, Python venv, Git, GitHub
+**Notes:**
 
-2. **Backend Setup**
+* Attempted `/api/v1/upload` via GET → **405 Method Not Allowed** (expected behavior)
+* Accessing `/upload` outside `/api/v1/` → **404 Not Found** (ensures versioned API)
 
-   * FastAPI running
-   * `/health` endpoint verified
+---
 
-3. **Version Control**
+## 6. Future Enhancements
 
-   * Commit #1 pushed to GitHub
+1. **Document Processing Pipeline**
 
-4. **Document Upload Feature**
+   * Extract text and metadata from uploaded PDFs
+   * Store parsed data in a structured database
 
-   * `/upload` endpoint accepts PDFs
-   * Saves to `backend/data/`
-   * Enterprise-safe, offline-first approach
+2. **Authentication & Authorization**
 
-5. **Interactive Testing**
+   * JWT / OAuth2 integration
+   * Role-based access for users
 
-   * Swagger UI available for real-time validation
+3. **Mobile Client Integration**
 
+   * Android client to upload and retrieve documents
+   * Interactive UI for document management
+
+4. **Advanced Features**
+
+   * PDF annotation, search, and categorization
+   * Dashboard with analytics on uploaded documents
+
+---
+
+## 7. Quick Start
+
+1. Clone repository:
+
+```bash
+git clone <repo-url>
+cd enterprise-doc-intel/backend
+```
+
+2. Activate virtual environment:
+
+```bash
+python -m venv venv
+venv\Scripts\activate
+```
+
+3. Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+4. Run FastAPI server:
+
+```bash
+uvicorn app.main:app --reload
+```
+
+5. Access Swagger UI:
+
+```
+http://127.0.0.1:8000/docs
+```
+
+---
+
+✅ **Project ready for enterprise-grade PDF upload and API testing**
+
+---
