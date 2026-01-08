@@ -73,7 +73,10 @@
 
 ## 3. Project Architecture
 
-![Enterprise Document Intelligence API Architecture](./docs/Enterprise_Document_Intelligence_API_Architecture.png)
+<img width="857" height="573" alt="image" src="https://github.com/user-attachments/assets/ead5a71f-a73f-44da-b4dc-51275b140229" />
+
+<img width="876" height="592" alt="image" src="https://github.com/user-attachments/assets/9c944eac-6ca0-432e-bd96-3999439457b1" />
+
 
 **Description:**
 
@@ -229,3 +232,4 @@ http://127.0.0.1:8000/docs
 ✅ **Project ready for enterprise-grade PDF upload and API testing**
 
 ---
+
