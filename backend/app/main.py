@@ -41,9 +41,9 @@ app = FastAPI( # Create FastAPI application instance for the backend service suc
 # Register Routers
 # -------------------------------
 
-app.include_router(root.router) # Include the root router such as health check and upload endpoints
-app.include_router(health.router) # Include the health check router such as system status endpoints
-app.include_router(upload.router) # Include the upload router such as document upload and processing endpoints
+app.include_router(root.router , prefix="/api/v1") # Include the root router such as health check and upload endpoints
+app.include_router(health.router, prefix="/api/v1") # Include the health check router such as system status endpoints
+app.include_router(upload.router, prefix="/api/v1") # Include the upload router such as document upload and processing endpoints
 # router is getting from route.py, health.py, upload.py respectively for modular route management
 # -------------------------------
 # Application Lifecycle Events
