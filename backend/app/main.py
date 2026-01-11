@@ -2,69 +2,44 @@
 # Enterprise Document Intelligence System
 # Backend Application Entry Point
 # ==========================================
-# Responsibilities of this file:
-# 1. Create FastAPI application instance
-# 2. Configure logging
-# 3. Register API routers
-# 4. Handle application startup/shutdown
-#
-# NO business logic lives here
-# ==========================================
 
-from fastapi import FastAPI # FastAPI framework for building APIs
-import logging  # Standard logging module
+from fastapi import FastAPI
+import logging
 
-from app.routes import root, health, upload # Importing route modules
-
-from app.api.v1.health import router as health_router
-from app.api.v1.upload import router as upload_router
-
+from app.routes import root, health, upload, search
 
 # -------------------------------
 # Logging Configuration
 # -------------------------------
-logging.basicConfig( # Configure logging settings
-    level=logging.INFO, # Set logging level to INFO
-    # Eg: DEBUG, INFO, WARNING, ERROR, CRITICAL
-    # Eg: INFO level logs general operational information such as startup/shutdown events
-    format="%(asctime)s [%(levelname)s] %(message)s" # Define log message format
-    # Eg: timestamp, log level, message
-    # such as "2023-10-01 12:00:00 [INFO] Application started"
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s"
 )
-logger = logging.getLogger(__name__) # Create a logger instance for this module
+logger = logging.getLogger(__name__)
 
 # -------------------------------
 # FastAPI App Setup
 # -------------------------------
-app = FastAPI( # Create FastAPI application instance for the backend service such as document processing and extraction
-    title="Enterprise Document Intelligence System", # Application title
-    version="0.1.0" # Application version
+app = FastAPI(
+    title="Enterprise Document Intelligence System",
+    version="0.1.0"
 )
 
 # -------------------------------
 # Register Routers
 # -------------------------------
+app.include_router(root.router)
+app.include_router(health.router)
+app.include_router(upload.router)
+app.include_router(search.router)
 
-def create_app() -> FastAPI:
-    app = FastAPI(title="Enterprise Document Intelligence")
-
-    app.include_router(health_router, prefix="/api/v1")
-    app.include_router(upload_router, prefix="/api/v1")
-
-    return app
-
-
-#app.include_router(root.router , prefix="/api/v1") # Include the root router such as health check and upload endpoints
-#app.include_router(health.router, prefix="/api/v1") # Include the health check router such as system status endpoints
-#app.include_router(upload.router, prefix="/api/v1") # Include the upload router such as document upload and processing endpoints
-# router is getting from route.py, health.py, upload.py respectively for modular route management
 # -------------------------------
 # Application Lifecycle Events
 # -------------------------------
-@app.on_event("startup") # Define startup event handler
-async def on_startup(): # Startup event function
-    logger.info("Enterprise Document Intelligence API started successfully") # Log startup message
+@app.on_event("startup")
+async def on_startup():
+    logger.info("Enterprise Document Intelligence API started successfully")
 
-@app.on_event("shutdown") # Define shutdown event handler
-async def on_shutdown(): # Shutdown event function
-    logger.info("Enterprise Document Intelligence API shut down") # Log shutdown message
+@app.on_event("shutdown")
+async def on_shutdown():
+    logger.info("Enterprise Document Intelligence API shut down")

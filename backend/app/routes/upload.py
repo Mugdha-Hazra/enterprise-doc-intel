@@ -1,25 +1,40 @@
-import os # Import os module for file path operations
-from fastapi import APIRouter, UploadFile, File # Import necessary FastAPI components, including APIRouter for route grouping and file upload handling
-from datetime import datetime # Import datetime for timestamping uploads
-from app.services.pdf_service import extract_text_from_pdf # Import the PDF text extraction service
+# app/routes/upload.py
 
-router = APIRouter(prefix="/api/v1") # Initialize APIRouter instance
+from fastapi import APIRouter, UploadFile, File, HTTPException
+from app.services.document_pipeline import DocumentPipeline
+import shutil
+import os
+import uuid
 
-UPLOAD_DIR = "data" # Directory to save uploaded files
-os.makedirs(UPLOAD_DIR, exist_ok=True) # Ensure the upload directory exists
+router = APIRouter(prefix="/api/v1", tags=["Upload"])
 
-@router.post("/upload") # Define the upload endpoint
-async def upload_document(file: UploadFile = File(...)): # Function to handle document uploads
-    file_path = os.path.join(UPLOAD_DIR, file.filename) # Define the file path to save the uploaded file
+UPLOAD_DIR = "data"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-    with open(file_path, "wb") as f: # Open the file in write-binary mode
-        f.write(await file.read()) # Write the uploaded file's content to disk
+pipeline = DocumentPipeline()
 
-    extracted_data = extract_text_from_pdf(file_path) # Extract text from the uploaded PDF using the service
 
-    return { # Return response with upload details and extracted data
-        "file_name": file.filename,
-        "uploaded_at": datetime.utcnow().isoformat(),
-        "pages": extracted_data["total_pages"],
-        "status": "processed"
+@router.post("/upload")
+async def upload_document(file: UploadFile = File(...)):
+    file_id = f"{uuid.uuid4()}_{file.filename}"
+    file_path = os.path.join(UPLOAD_DIR, file_id)
+
+    # Save file
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    # Process document
+    extracted_data = pipeline.process(file_path)
+
+    extracted_text = extracted_data.get("text")
+
+    if not extracted_text:
+        raise HTTPException(
+            status_code=400,
+            detail="Document extraction failed. No text found."
+        )
+
+    return {
+        "message": "Document uploaded and indexed successfully",
+        "chunks": extracted_data.get("chunks")
     }
