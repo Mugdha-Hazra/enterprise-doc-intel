@@ -16,6 +16,10 @@ import logging  # Standard logging module
 
 from app.routes import root, health, upload # Importing route modules
 
+from app.api.v1.health import router as health_router
+from app.api.v1.upload import router as upload_router
+
+
 # -------------------------------
 # Logging Configuration
 # -------------------------------
@@ -41,9 +45,18 @@ app = FastAPI( # Create FastAPI application instance for the backend service suc
 # Register Routers
 # -------------------------------
 
-app.include_router(root.router , prefix="/api/v1") # Include the root router such as health check and upload endpoints
-app.include_router(health.router, prefix="/api/v1") # Include the health check router such as system status endpoints
-app.include_router(upload.router, prefix="/api/v1") # Include the upload router such as document upload and processing endpoints
+def create_app() -> FastAPI:
+    app = FastAPI(title="Enterprise Document Intelligence")
+
+    app.include_router(health_router, prefix="/api/v1")
+    app.include_router(upload_router, prefix="/api/v1")
+
+    return app
+
+
+#app.include_router(root.router , prefix="/api/v1") # Include the root router such as health check and upload endpoints
+#app.include_router(health.router, prefix="/api/v1") # Include the health check router such as system status endpoints
+#app.include_router(upload.router, prefix="/api/v1") # Include the upload router such as document upload and processing endpoints
 # router is getting from route.py, health.py, upload.py respectively for modular route management
 # -------------------------------
 # Application Lifecycle Events

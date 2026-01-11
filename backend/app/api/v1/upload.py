@@ -1,14 +1,18 @@
-from fastapi import APIRouter, UploadFile, File
-from app.core.config import DATA_DIR
-from app.repositories.file_repository import FileRepository
-from app.services.file_service import FileService
+from fastapi import APIRouter, UploadFile, File, HTTPException
 
-router = APIRouter(tags=["Upload"])
-
-file_repository = FileRepository(DATA_DIR)
-file_service = FileService(file_repository)
-
+router = APIRouter()
 
 @router.post("/upload")
-def upload_document(file: UploadFile = File(...)):
-    return file_service.upload_pdf(file)
+async def upload_file(file: UploadFile = File(...)):
+    # Validate content type
+    if file.content_type != "application/pdf":
+        raise HTTPException(
+            status_code=400,
+            detail="Only PDF files are supported"
+        )
+
+    # Phase 1: no persistence, no processing
+    return {
+        "status": "uploaded",
+        "filename": file.filename
+    }
