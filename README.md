@@ -1,5 +1,3 @@
----
-
 # Enterprise Document Intelligence API
 
 ## 1. Project Overview
@@ -66,32 +64,37 @@ pip install -r requirements.txt
 ## 3. Architecture
 
 **High-Level Flow:**
+<img width="383" height="580" alt="image" src="https://github.com/user-attachments/assets/768fda1b-eaed-4174-9cdf-8871666b3471" />
 
 ```
-Client (Web / Mobile)
+  ┌────────────────────────────┐
+  |  Client (Web / Mobile)      |
+  └────────────────────────────┘
         |
         v
-   FastAPI Backend (/api/v1/)
+  ┌────────────────────────────┐
+  | FastAPI Backend (/api/v1/) |
+  └────────────────────────────┘
         |
         v
-  ┌─────────────┐
-  │ Upload PDF  │
-  └─────────────┘
+  ┌────────────────────────────┐
+  │ Upload PDF                 │
+  └────────────────────────────┘
         |
         v
-  ┌─────────────┐
+  ┌────────────────────────────┐
   │ Text Extraction & Chunking │
-  └─────────────┘
+  └────────────────────────────┘
         |
         v
-  ┌─────────────┐
-  │ Embeddings / FAISS Index │
-  └─────────────┘
+  ┌────────────────────────────┐
+  │ Embeddings / FAISS Index   │
+  └────────────────────────────┘
         |
         v
-  ┌─────────────┐
-  │ LLM / RAG Service │
-  └─────────────┘
+  ┌────────────────────────────┐
+  │ LLM / RAG Service          │
+  └────────────────────────────┘
         |
         v
   Client Queries → Answers
@@ -241,3 +244,4 @@ pytest -v
 ✅ **Enterprise-ready PDF ingestion, processing, and RAG search backend is now fully operational.**
 
 ---
+
