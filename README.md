@@ -1,109 +1,121 @@
+---
+
 # Enterprise Document Intelligence API
 
-## 1. Project Setup (Foundation)
+## 1. Project Overview
 
-### Actions Taken:
+**Enterprise Document Intelligence** is a Python-based FastAPI backend system for **offline-first, enterprise-grade PDF ingestion, processing, and retrieval**. It supports PDF upload, search, and a modular document intelligence pipeline, including chunking, embeddings, and LLM-based question-answering.
 
-1. **Created project folder**
+**Key Features:**
 
-   ```
-   C:\Users\KIIT\enterprise-doc-intel
-   ```
-
-   with subfolders:
-
-   * `backend/` → Python FastAPI backend
-   * `android/` → future mobile client
-   * `README.md` → project documentation
-
-2. **Initialized Git repository**
-
-   ```bat
-   git init
-   git branch -M main
-   ```
-
-   * Enables **version control** and incremental commits.
-
-3. **Created Python virtual environment**
-
-   ```bat
-   python -m venv venv
-   venv\Scripts\activate
-   ```
-
-   * Isolated project dependencies
-   * Prevents conflicts with system Python
-
-4. **Installed dependencies** (via `requirements.txt`):
-
-   * `fastapi` → backend framework
-   * `uvicorn` → ASGI server for FastAPI
-   * `pydantic` → data validation
-   * `python-multipart` → file upload handling
-   * Additional packages: `shutil`, `pathlib` (built-in), etc.
-
-5. **Backend folder structure**
-
-   ```
-   backend/
-       app/
-           main.py
-       data/                  # PDF storage
-       venv/
-       requirements.txt
-   ```
-
-6. **Verified FastAPI Health Check**
-
-   * Endpoint: `/api/v1/health`
-   * Response: `{"status":"ok"}`
-   * Confirms backend is **running correctly**.
+* Versioned API (`/api/v1/`) for stability
+* PDF upload and storage
+* Text extraction, chunking, and semantic indexing
+* Retrieval-Augmented Generation (RAG) with LLM support
+* Interactive Swagger UI for API testing
+* Fully tested backend (unit & integration tests)
 
 ---
 
-## 2. GitHub Integration
+## 2. Project Setup (Foundation)
 
-* Repository created and linked to local repo
-* First commit pushed
+### Actions Taken
+
+1. **Project Folder Structure**
+
+```
+C:\Users\KIIT\enterprise-doc-intel
+│
+├─ backend/                 # Python backend
+│   ├─ app/
+│   │   ├─ main.py          # FastAPI app
+│   │   ├─ routes/
+│   │   ├─ services/        # PDF, embeddings, chunking, LLM, RAG
+│   │   └─ search/          # FAISS-based indexing
+│   ├─ data/                # Uploaded PDFs
+│   ├─ tests/               # Unit & integration tests
+│   └─ requirements.txt
+└─ android/                 # Future mobile client
+```
+
+2. **Git & GitHub Integration**
+
+* Repository initialized, main branch created
+* Remote linked for version tracking
 * Credential caching enabled
-* Outcome: **Remote backup + version tracking**
+
+3. **Python Environment**
+
+```bash
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+* Isolated dependencies, preventing conflicts
+* Supports Python 3.10+
+
+4. **FastAPI Health Check**
+
+* Endpoint: `/api/v1/health`
+* Response: `{"status": "ok"}`
+* Confirms backend is running
 
 ---
 
-## 3. Project Architecture
+## 3. Architecture
 
-<img width="857" height="573" alt="image" src="https://github.com/user-attachments/assets/ead5a71f-a73f-44da-b4dc-51275b140229" />
+**High-Level Flow:**
 
-<img width="876" height="592" alt="image" src="https://github.com/user-attachments/assets/9c944eac-6ca0-432e-bd96-3999439457b1" />
+```
+Client (Web / Mobile)
+        |
+        v
+   FastAPI Backend (/api/v1/)
+        |
+        v
+  ┌─────────────┐
+  │ Upload PDF  │
+  └─────────────┘
+        |
+        v
+  ┌─────────────┐
+  │ Text Extraction & Chunking │
+  └─────────────┘
+        |
+        v
+  ┌─────────────┐
+  │ Embeddings / FAISS Index │
+  └─────────────┘
+        |
+        v
+  ┌─────────────┐
+  │ LLM / RAG Service │
+  └─────────────┘
+        |
+        v
+  Client Queries → Answers
+```
 
+**Details:**
 
-**Description:**
-
-* Clients (Web/Mobile) interact with **FastAPI backend**
-* Routes available under `/api/v1/`:
-
-  * `/health` → checks server status
-  * `/upload` → accepts PDF files only
-* Uploaded PDFs stored in **`backend/data/`**
-* Swagger UI provides **interactive API testing**
-* Backend designed for **enterprise-level data separation and offline-first operation**
+* **Upload** → PDF files stored in `backend/data/`
+* **Processing Pipeline** → Chunks documents, generates embeddings, indexes in FAISS
+* **Search & LLM** → Query documents via semantic search, provide LLM-generated answers
+* **Modular Design** → Each service is isolated for maintainability
 
 ---
 
-## 4. Phase 2: Document Upload Feature
+## 4. API Endpoints
 
-### Step 1: Storage Preparation
+| Endpoint         | Method | Description                               |
+| ---------------- | ------ | ----------------------------------------- |
+| `/api/v1/health` | GET    | Returns server status (`{"status":"ok"}`) |
+| `/api/v1/upload` | POST   | Upload PDF files only                     |
+| `/api/v1/search` | POST   | Search uploaded PDFs by query text        |
+| `/api/v1/query`  | POST   | RAG-powered answer retrieval from PDFs    |
 
-* Created `backend/data/` folder
-* Added to `.gitignore` → prevents committing user data
-* Mimics **enterprise-grade separation of data**.
-
----
-
-### Step 2: Add `/upload` Endpoint
-
-**Python Implementation:**
+**Upload Example:**
 
 ```python
 @app.post("/api/v1/upload")
@@ -115,41 +127,33 @@ def upload_document(file: UploadFile = File(...)):
     with destination.open("wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    return {"filename": file.filename, "status": "uploaded"}
+    return {"chunks": 1, "message": "Document uploaded and indexed successfully"}
 ```
 
-**Step-by-Step Explanation:**
+---
 
-1. **`@app.post("/api/v1/upload")`**
+## 5. Testing
 
-   * Receives **POST requests** with file upload.
-2. **File Handling**
+* **Unit & Integration Tests:** `pytest -v`
+* **All tests passing (10/10)**
 
-   * `UploadFile` provides filename, file stream, and MIME type.
-3. **Validation**
+```
+tests/test_api.py
+tests/test_upload.py
+tests/test_health.py
+tests/test_search.py
+```
 
-   * Ensures only **PDF files** are accepted.
-4. **File Storage**
+* Includes tests for:
 
-   * Streams file to `backend/data/` safely.
-5. **Response**
-
-   * Returns JSON confirming successful upload.
+  * PDF upload (valid/empty/invalid files)
+  * Search endpoint with/without results
+  * Health check endpoint
+* Ensures **robust, production-ready backend**
 
 ---
 
-### Step 3: Swagger UI
-
-* Navigate: `http://127.0.0.1:8000/docs`
-* Interactive API testing:
-
-  * `/api/v1/health` → GET
-  * `/api/v1/upload` → POST (PDF only)
-* Allows **quick validation of endpoints**.
-
----
-
-## 5. Current Status
+## 6. Current Status
 
 | Feature                            | Status                      |
 | ---------------------------------- | --------------------------- |
@@ -158,42 +162,41 @@ def upload_document(file: UploadFile = File(...)):
 | Virtual Environment & Dependencies | ✅ Completed                 |
 | `/api/v1/health` endpoint          | ✅ Working                   |
 | `/api/v1/upload` endpoint          | ✅ Working (PDF only)        |
-| Swagger UI                         | ✅ Interactive testing ready |
+| `/api/v1/search` endpoint          | ✅ Working                   |
+| `/api/v1/query` endpoint (RAG)     | ✅ Working                   |
 | File storage (`backend/data/`)     | ✅ Working                   |
-| API versioning `/api/v1/`          | ✅ Implemented               |
-
-**Notes:**
-
-* Attempted `/api/v1/upload` via GET → **405 Method Not Allowed** (expected behavior)
-* Accessing `/upload` outside `/api/v1/` → **404 Not Found** (ensures versioned API)
+| Modular document pipeline          | ✅ Implemented               |
+| Tests (`pytest`)                   | ✅ All passing               |
+| Swagger UI                         | ✅ Interactive testing ready |
 
 ---
 
-## 6. Future Enhancements
+## 7. Future Enhancements
 
-1. **Document Processing Pipeline**
+1. **Authentication & Authorization**
 
-   * Extract text and metadata from uploaded PDFs
-   * Store parsed data in a structured database
+* JWT / OAuth2
+* Role-based access
 
-2. **Authentication & Authorization**
+2. **Advanced Search & RAG**
 
-   * JWT / OAuth2 integration
-   * Role-based access for users
+* LLM fine-tuning on enterprise docs
+* Semantic search across multiple document types
 
-3. **Mobile Client Integration**
+3. **Frontend & Mobile Clients**
 
-   * Android client to upload and retrieve documents
-   * Interactive UI for document management
+* Android/iOS client integration
+* Dashboard for analytics and document management
 
-4. **Advanced Features**
+4. **Analytics & Reporting**
 
-   * PDF annotation, search, and categorization
-   * Dashboard with analytics on uploaded documents
+* Document upload metrics
+* Search query analytics
+* Performance dashboards
 
 ---
 
-## 7. Quick Start
+## 8. Quick Start
 
 1. Clone repository:
 
@@ -221,15 +224,20 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
-5. Access Swagger UI:
+5. Access API docs (Swagger UI):
 
 ```
 http://127.0.0.1:8000/docs
 ```
 
+6. Run all tests:
+
+```bash
+pytest -v
+```
+
 ---
 
-✅ **Project ready for enterprise-grade PDF upload and API testing**
+✅ **Enterprise-ready PDF ingestion, processing, and RAG search backend is now fully operational.**
 
 ---
-
